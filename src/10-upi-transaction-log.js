@@ -47,5 +47,64 @@
  *   //      frequentContact: "Swiggy", allAbove100: false, hasLargeTransaction: true }
  */
 export function analyzeUPITransactions(transactions) {
-  // Your code here
+  
+  if (!Array.isArray(transactions) || transactions.length === 0 || !transactions) {
+    return null;
+  }
+
+
+  const validTransactions = transactions.filter((item) => item.amount >=0 && (item.type=="credit" || item.type =="debit"));
+
+  if (validTransactions.length ===0) return null;
+
+  let transactionCount = validTransactions.length;
+
+  const totalAmount = validTransactions.reduce((a,b) => {
+    if (b.type === "credit") {
+      a.credit += b.amount;
+    } else {
+      a.debit += b.amount;
+    }
+
+    return a;
+  },{debit:0, credit:0});
+
+  const averageTxn = Math.round((totalAmount.debit + totalAmount.credit)/transactionCount);
+
+  const highestTransaction = validTransactions.reduce((a,b) => a.amount > b.amount ? a:b);
+
+  const categoryItems = validTransactions.reduce((a,b) => {
+
+    if (Object.keys(a).includes(b.category)) {
+      a[b.category] += b.amount;
+    } else {
+      a[b.category] = b.amount;
+    }
+
+    return a;
+
+  },{});
+
+  const contactsFrequency = validTransactions.reduce((a,b) => {
+
+    if (Object.keys(a).includes(b.to)) {
+      a[b.to] += 1;
+    } else {
+      a[b.to] = 1;
+    }
+    return a;
+
+  },{});
+
+  const maxFreq = Math.max(...Object.values(contactsFrequency));
+
+  const frequentContact = Object.entries(contactsFrequency).find((contact) => contact[1] === maxFreq);
+
+
+
+
+
+  return { totalCredit: totalAmount.credit, totalDebit: totalAmount.debit, netBalance: totalAmount.credit - totalAmount.debit, transactionCount: transactionCount, avgTransaction: averageTxn, highestTransaction: highestTransaction, categoryBreakdown: categoryItems, frequentContact: frequentContact[0], allAbove100: validTransactions.every((n) => n.amount>100), hasLargeTransaction: validTransactions.some((n) => n.amount>=5000) }
+
+
 }

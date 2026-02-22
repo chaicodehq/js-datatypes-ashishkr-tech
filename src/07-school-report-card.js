@@ -41,5 +41,62 @@
  *   // => { name: "Priya", totalMarks: 63, percentage: 31.5, grade: "F", ... }
  */
 export function generateReportCard(student) {
-  // Your code here
+  if (!student || typeof(student) != 'object' || Array.isArray(student) || typeof(student.name) != 'string' || !student.name ) {
+    return null;
+  }
+
+  if (typeof(student.marks) != 'object' || Array.isArray(student.marks) || Object.keys(student.marks).length === 0) {
+    return null;
+  }
+
+  const marksValues = Object.values(student.marks); // correct
+
+
+  const checkNullMarks = marksValues.some((item) => typeof(item) != 'number');
+  
+  if (checkNullMarks) {
+    return null;
+  }
+
+  if (marksValues.some((element) => element < 0 || element > 100)) {
+    return null;
+  }
+
+  // const maxMarks = Math.max(marksValues)
+  let grade; // correct
+
+  
+  const marksTotal = marksValues.reduce((acc,currentValue) => acc + currentValue,0); // correct
+  
+  const percentMarks = parseFloat(((marksTotal / ((marksValues.length) * 100)) * 100).toFixed(2)); // correct
+
+  const subjectAndMarks = Object.entries(student.marks); 
+
+
+
+   const lowestMarks = subjectAndMarks.reduce((a,b) => a[1] < b[1] ? a:b);    
+   const highestMarks = subjectAndMarks.reduce((a,b) => a[1] > b[1] ? a:b);    
+
+  // below if-else correct
+  if (percentMarks >= 90 ) {
+    grade ="A+";
+  } else if (percentMarks >=80) {
+    grade = "A";
+  } else if (percentMarks >=70) {
+    grade = "B";
+  } else if (percentMarks >= 60) {
+    grade = "C";
+  } else if (percentMarks >= 40) {
+    grade = "D";
+  } else {
+    grade = "F";
+  }
+
+  const subjectsPassed = subjectAndMarks.filter((item) => item[1] >= 40);
+  const subjectsFailed = subjectAndMarks.filter((item) => item[1] < 40);
+
+
+  return { name: student.name, totalMarks: marksTotal, percentage: percentMarks, grade: grade, highestSubject: highestMarks[0], lowestSubject: lowestMarks[0], passedSubjects: subjectsPassed.map(item => item[0]), failedSubjects: subjectsFailed.map(item => item[0]), subjectCount: marksValues.length };
+
 }
+
